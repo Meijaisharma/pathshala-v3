@@ -1,11 +1,14 @@
 const express = require('express');
 const { TelegramClient, Api } = require("telegram");
 const { StringSession } = require("telegram/sessions");
-const path = require('path');
+const path = require('path'); // Added for frontend mapping
 const cors = require('cors');
 
 const app = express();
 app.use(cors());
+
+// Is line se server 'public' folder ki index.html file ko pehchanega
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Credentials
 const apiId = parseInt(process.env.API_ID);
@@ -23,25 +26,18 @@ async function startTelegram() {
     await client.start({ onError: (e) => console.log(e) });
     console.log("✅ SYSTEM LIVE: New Logic & Details Ready");
     
-    // Keep-Alive (Heartbeat)
+    // Heartbeat to keep connection alive
     setInterval(async () => {
         if (!client.connected) try { await client.connect(); } catch(e) {}
     }, 20000);
 }
 startTelegram();
 
-// --- NEW LOGIC: ID MAPPING ---
+// --- NEW LOGIC: ID MAPPING (116 -> 159) ---
 function getRealId(id) {
     id = parseInt(id);
-    
-    // 1 se 115 tak -> (+1)
-    if (id <= 115) {
-        return id + 1;
-    } 
-    // 116 se aage -> (+43) yani 116 banega 159
-    else {
-        return id + 43;
-    }
+    if (id <= 115) return id + 1;
+    else return id + 43;
 }
 
 // 1. VIDEO API (Stream)
@@ -59,7 +55,6 @@ app.get('/api/video/:id', async (req, res) => {
         const fileSize = Number(doc.size);
         const range = req.headers.range;
 
-        // Console me dikhega kaunsa video chal raha hai
         console.log(`Request: ${req.params.id} -> Playing MsgID: ${msgId}`);
 
         if (range) {
@@ -75,7 +70,6 @@ app.get('/api/video/:id', async (req, res) => {
                 "Content-Type": "video/mp4",
             });
 
-            // Native Stream with Force DC
             const stream = client.iterDownload(media, { 
                 offset: start, 
                 limit: chunk,
@@ -95,39 +89,34 @@ app.get('/api/video/:id', async (req, res) => {
     }
 });
 
-// 2. DETAILS API (Video Caption/Name)
+// 2. META API (Details from Telegram Caption)
 app.get('/api/meta/:id', async (req, res) => {
     try {
         if (!client.connected) await client.connect();
         const msgId = getRealId(req.params.id);
         const msgs = await client.getMessages("jaikipathshalax", { ids: [msgId] });
-        
-        // Caption ya text bhejega
-        const caption = msgs[0]?.message || "No Details Available";
-        res.json({ text: caption });
-        
-    } catch (e) { 
-        res.json({ text: "Loading..." }); 
-    }
+        res.json({ text: msgs[0]?.message || "No Details Available" });
+    } catch (e) { res.json({ text: "Loading..." }); }
 });
 
-// 3. PDF API (Isme bhi logic lagana hai to bata dena, abhi direct ID hai)
+// 3. PDF API
 app.get('/api/pdf/:id', async (req, res) => {
     try {
         if (!client.connected) await client.connect();
-        const msgId = parseInt(req.params.id); 
-        const msgs = await client.getMessages("jaikipathshalax", { ids: [msgId] });
+        const msgs = await client.getMessages("jaikipathshalax", { ids: [parseInt(req.params.id)] });
         const media = msgs[0]?.media;
-        
-        if(!media) return res.status(404).send("Not Found");
+        if(!media) return res.status(404).send("PDF Not Found");
         
         res.setHeader('Content-Type', 'application/pdf');
         await client.downloadMedia(media, { outputFile: res, workers: 1, dcId: media.document.dcId });
-    } catch (e) { res.status(500).send("Error"); }
+    } catch (e) { res.status(500).send("Error downloading PDF"); }
 });
 
-app.get('/', (req, res) => res.send("Pathshala V3 Server Running"));
+// Main Route - Isse 'index.html' dikhegi render link par
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/index.html'));
+});
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Run on ${PORT}`));
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
 
