@@ -3,86 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PathshalaX - Lecture Player</title>
+    <title>PathshalaX - Hindi Sahitya</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .active-tab { border-bottom: 3px solid #6366f1; color: #6366f1; }
+        body { background: #f3f4f6; font-family: 'Inter', sans-serif; }
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .active-video { border: 2px solid #6366f1; background: #eef2ff; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="text-gray-800">
 
-    <div class="bg-black w-full aspect-video flex items-center justify-center relative">
-        <video id="mainPlayer" controls class="w-full h-full max-h-[70vh]" poster="https://via.placeholder.com/800x450?text=PathshalaX+Video">
-            <source id="videoSource" src="" type="video/mp4">
-        </video>
-    </div>
-
-    <div class="p-4 bg-white shadow-sm">
-        <h1 id="lectureTitle" class="text-xl font-bold text-gray-800">हिंदी साहित्य (कक्षा)</h1>
-        <p class="text-gray-500 text-sm">Hindi Sahitya • Jai Sir</p>
-    </div>
-
-    <div class="flex justify-around bg-white border-t border-b text-gray-500 font-medium">
-        <button onclick="showTab('details')" id="tab-details" class="py-3 px-6 active-tab"><i class="fas fa-info-circle mr-2"></i>Details</button>
-        <button onclick="showTab('notes')" id="tab-notes" class="py-3 px-6"><i class="fas fa-file-alt mr-2"></i>Notes</button>
-        <button onclick="showTab('chat')" id="tab-chat" class="py-3 px-6"><i class="fas fa-comment-dots mr-2"></i>Chat</button>
-    </div>
-
-    <div id="content-details" class="p-6">
-        <h2 class="text-lg font-semibold mb-4 text-gray-700">Lecture Details</h2>
-        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 italic text-gray-600" id="metaText">
-            विवरण लोड हो रहा है...
+    <div class="sticky top-0 z-50 glass shadow-sm p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button class="text-gray-600 p-2"><i class="fas fa-arrow-left"></i></button>
+            <h1 class="font-bold text-lg">Daily Live Classes</h1>
         </div>
+        <span class="bg-green-100 text-green-600 text-xs font-bold px-2 py-1 rounded">FREE</span>
     </div>
 
-    <div id="content-notes" class="p-4 hidden space-y-4">
-        <div class="flex items-center justify-between p-4 bg-white rounded-2xl border-l-4 border-red-500 shadow-sm">
-            <div class="flex items-center">
-                <div class="bg-red-50 p-3 rounded-full mr-4"><i class="fas fa-file-pdf text-red-500 text-xl"></i></div>
-                <div>
-                    <h3 class="font-bold text-gray-800">Class Note 1</h3>
-                    <p class="text-xs text-gray-400">PDF Document</p>
+    <div class="max-w-4xl mx-auto pb-20">
+        
+        <div class="m-4 rounded-3xl overflow-hidden glass shadow-xl border border-white">
+            <div class="aspect-video bg-gray-200 flex items-center justify-center">
+                <video id="mainPlayer" controls class="w-full h-full" poster="https://via.placeholder.com/800x450/e2e8f0/64748b?text=PathshalaX+Lecture">
+                    <source id="videoSource" src="" type="video/mp4">
+                </video>
+            </div>
+            <div class="p-5">
+                <h2 id="currentTitle" class="text-xl font-extrabold text-gray-900 leading-tight">लेक्चर लोड हो रहा है...</h2>
+                <div class="mt-2 flex items-center gap-2 text-sm text-gray-500 font-medium">
+                    <span class="flex items-center gap-1"><i class="fas fa-book-open text-indigo-500"></i> Hindi Sahitya</span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1"><i class="fas fa-user-tie text-indigo-500"></i> Jai Sir</span>
                 </div>
             </div>
-            <div class="flex gap-2">
-                <button class="px-4 py-1 border border-indigo-600 text-indigo-600 rounded-lg text-sm font-semibold">Open</button>
-                <button class="px-4 py-1 bg-gray-800 text-white rounded-lg text-sm font-semibold">Download</button>
+        </div>
+
+        <div class="mx-4 mb-4 flex gap-2">
+            <button onclick="switchTab('meta')" id="tab-meta" class="flex-1 py-3 rounded-2xl font-bold transition-all glass active-video">Details</button>
+            <button onclick="switchTab('notes')" id="tab-notes" class="flex-1 py-3 rounded-2xl font-bold transition-all glass">Notes</button>
+        </div>
+
+        <div id="section-meta" class="mx-4 p-5 rounded-3xl glass shadow-sm min-h-[100px]">
+            <p id="metaDesc" class="text-gray-600 whitespace-pre-line leading-relaxed italic">वीडियो का विवरण टेलीग्राम से लोड किया जा रहा है...</p>
+        </div>
+
+        <div id="section-notes" class="mx-4 hidden space-y-3">
+            <div class="p-4 glass rounded-3xl flex items-center justify-between border-l-4 border-red-500">
+                <div class="flex items-center gap-4">
+                    <div class="bg-red-50 p-3 rounded-full text-red-500"><i class="fas fa-file-pdf"></i></div>
+                    <div><h4 class="font-bold text-sm">Class Handouts</h4><p class="text-[10px] text-gray-400 uppercase tracking-widest">Digital PDF</p></div>
+                </div>
+                <button class="bg-indigo-600 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-indigo-200">Download</button>
             </div>
+        </div>
+
+        <div class="px-4 mt-8">
+            <h3 class="font-bold text-gray-500 text-sm mb-4 tracking-wider uppercase">Suggested Past Classes</h3>
+            <div id="lectureList" class="space-y-4">
+                </div>
         </div>
     </div>
 
     <script>
-        const videoId = "1"; // Yahan se video ID badli ja sakti hai
-        const baseUrl = window.location.origin;
+        const totalVideos = 157;
+        const listContainer = document.getElementById('lectureList');
+        const player = document.getElementById('mainPlayer');
+        const source = document.getElementById('videoSource');
 
-        // Load Meta & Video
-        async function loadLecture() {
-            // 1. Set Video Source
-            document.getElementById('videoSource').src = `${baseUrl}/api/video/${videoId}`;
-            document.getElementById('mainPlayer').load();
-
-            // 2. Fetch Meta Details
-            try {
-                const res = await fetch(`${baseUrl}/api/meta/${videoId}`);
-                const data = await res.json();
-                document.getElementById('metaText').innerText = data.text;
-                document.getElementById('lectureTitle').innerText = data.text.split('\n')[0];
-            } catch (e) {
-                document.getElementById('metaText').innerText = "विवरण उपलब्ध नहीं है।";
+        // 1. Generate 157 Videos List
+        function buildList() {
+            for (let i = 1; i <= totalVideos; i++) {
+                const item = document.createElement('div');
+                item.className = "flex gap-4 p-3 rounded-3xl glass transition-all cursor-pointer hover:bg-white";
+                item.onclick = () => playLecture(i);
+                item.innerHTML = `
+                    <div class="relative w-32 h-20 rounded-2xl overflow-hidden bg-gray-300">
+                        <img src="https://via.placeholder.com/150x100/f8fafc/6366f1?text=Class+${i}" class="w-full h-full object-cover opacity-80">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/10"><i class="fas fa-play text-white text-xs"></i></div>
+                    </div>
+                    <div class="flex-1 py-1">
+                        <span class="text-[10px] text-indigo-500 font-bold uppercase tracking-tighter">Lecture ${i}</span>
+                        <h4 class="font-bold text-gray-800 text-sm leading-tight mt-1">हिंदी साहित्य: कक्षा ${i} की चर्चा</h4>
+                        <p class="text-xs text-gray-400 mt-1">Jai Sharma Sir • 2h 14m</p>
+                    </div>
+                `;
+                listContainer.appendChild(item);
             }
         }
 
-        function showTab(tabName) {
-            ['details', 'notes', 'chat'].forEach(t => {
-                document.getElementById(`content-${t}`).classList.add('hidden');
-                document.getElementById(`tab-${t}`).classList.remove('active-tab');
-            });
-            document.getElementById(`content-${tabName}`).classList.remove('hidden');
-            document.getElementById(`tab-${tabName}`).classList.add('active-tab');
+        // 2. Play Function
+        async function playLecture(id) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            source.src = `/api/video/${id}`;
+            player.load();
+            player.play();
+
+            // Fetch Meta from Telegram
+            try {
+                const res = await fetch(`/api/meta/${id}`);
+                const data = await res.json();
+                document.getElementById('metaDesc').innerText = data.text;
+                document.getElementById('currentTitle').innerText = data.text.split('\n')[0] || `Hindi Sahitya Class ${id}`;
+            } catch (e) {
+                document.getElementById('metaDesc').innerText = "Details not found.";
+            }
         }
 
-        loadLecture();
+        // 3. Tab Switcher
+        function switchTab(type) {
+            const isMeta = type === 'meta';
+            document.getElementById('section-meta').classList.toggle('hidden', !isMeta);
+            document.getElementById('section-notes').classList.toggle('hidden', isMeta);
+            document.getElementById('tab-meta').classList.toggle('active-video', isMeta);
+            document.getElementById('tab-notes').classList.toggle('active-video', !isMeta);
+        }
+
+        buildList();
+        playLecture(1); // Load first video by default
     </script>
 </body>
 </html>
